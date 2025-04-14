@@ -11,10 +11,11 @@ const Home = () => {
   const navigate = useNavigate();
   const clickSound = useRef(null);
 
-  const handleClick = (path) => {
-    if (clickSound.current) {
-      clickSound.current.play();
-    }
+  interface HandleClickProps {
+    path: string;
+  }
+
+  const handleClick = (path: HandleClickProps["path"]): void => {
     setTimeout(() => navigate(path), 150); // Delay to sync with sound
   };
 

@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuiz } from "../QuizContext";
 
+interface UserResponse {
+  score: number;
+  question: string;
+  userAnswer: string;
+  isCorrect: boolean;
+}
+
 const Result = () => {
   const navigate = useNavigate();
   const { responses } = useQuiz();
@@ -16,15 +23,15 @@ const Result = () => {
     console.log(overallScore);
     setOverallScore(total);
   };
-  const isNotAttempted = (responses: []) => {
-    if (!responses) {
-      navigate("/");
-      return;
-    }
-    if (responses.length <= 0) {
-      navigate("/");
-    }
-  };
+  const isNotAttempted = (responses: UserResponse[]) => {
+      if (!responses) {
+        navigate("/");
+        return;
+      }
+      if (responses.length <= 0) {
+        navigate("/");
+      }
+    };
   useEffect(() => {
     isNotAttempted(responses);
     calculateScore();
