@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -7,10 +7,28 @@ import { useQuiz } from "../QuizContext";
 
 const Result = () => {
   const navigate = useNavigate();
-  const { responses} = useQuiz();
+  const { responses } = useQuiz();
+  const [overallScore, setOverallScore] = useState(0);
   console.log(responses);
-  const overallScore = 50;
-  const maxScore = responses.length * 10;
+  // const overallScore = 50;
+  const calculateScore = () => {
+    const total = responses.reduce((acc, curr) => acc + curr.score, 0);
+    console.log(overallScore);
+    setOverallScore(total);
+  };
+  const isNotAttempted = (responses: []) => {
+    if (!responses) {
+      navigate("/");
+      return;
+    }
+    if (responses.length <= 0) {
+      navigate("/");
+    }
+  };
+  useEffect(() => {
+    isNotAttempted(responses);
+    calculateScore();
+  }, [responses]);
 
   return (
     <motion.div
@@ -149,4 +167,4 @@ const Result = () => {
   );
 };
 
-export default Result;
+export default Result;
