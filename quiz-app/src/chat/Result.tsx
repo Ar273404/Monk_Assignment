@@ -1,76 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-// Define interfaces for the result data (simplified based on the image)
-interface Response {
-  prompt: string;
-  userResponse: string;
-  isCorrect: boolean;
-  score: number;
-}
+import { useQuiz } from "../QuizContext";
 
 const Result = () => {
-    const navigate = useNavigate();
-  const [responses, setResponses] = useState<Response[]>([]);
-  const overallScore = 93; // Example score from the image
-
-  // Mock data for responses (replace with actual data from QuizPage or server)
-  useEffect(() => {
-    const mockResponses: Response[] = [
-      {
-        prompt:
-          "The cat chased the mouse across the yard, leaping over obstacles along the way.",
-        userResponse:
-          "The cat chased the mouse across the yard, leaping over obstacles along the way.",
-        isCorrect: true,
-        score: 10,
-      },
-      {
-        prompt:
-          "She quickly finished her homework before dinner, ensuring she had time to relax afterward.",
-        userResponse:
-          "She quickly finished her homework before dinner, ensuring she had time to relax afterward.",
-        isCorrect: true,
-        score: 10,
-      },
-      {
-        prompt:
-          "The boy running quickly was hard to catch, as he darted between the trees with incredible speed.",
-        userResponse:
-          "The running boy was hard to catch, as he darted between the trees with incredible speed.",
-        isCorrect: false,
-        score: 7,
-      },
-      {
-        prompt:
-          "We will go to the market after school to buy fresh vegetables and fruits for the week.",
-        userResponse:
-          "We will go to the market after school to buy fresh vegetables and fruits for the week.",
-        isCorrect: true,
-        score: 10,
-      },
-      {
-        prompt:
-          "Had the car been parked outside yesterday, it would have been an obstacle for others to drive?",
-        userResponse:
-          "Had the car been parked outside yesterday, it would have been an obstacle for others to drive by?",
-        isCorrect: false,
-        score: 5,
-      },
-    ];
-    setResponses(mockResponses);
-  }, []);
-
-  // Calculate total score (for demonstration; replace with actual logic)
-  const totalScore = responses.reduce(
-    (sum, response) => sum + response.score,
-    0
-  );
-  const maxScore = 50; // Assuming 5 questions with 10 points each
+  const navigate = useNavigate();
+  const { responses} = useQuiz();
+  console.log(responses);
+  const overallScore = 50;
+  const maxScore = responses.length * 10;
 
   return (
     <motion.div
@@ -89,13 +29,13 @@ const Result = () => {
         <Button
           variant="ghost"
           className="text-gray-400 hover:text-white"
-            onClick={() => navigate("/home")}
+          onClick={() => navigate("/home")}
         >
           ←
         </Button>
       </motion.div>
 
-      {/* Header with Title */}
+      {/* Header */}
       <motion.div
         className="text-center mb-6"
         initial={{ y: -20, opacity: 0 }}
@@ -123,7 +63,6 @@ const Result = () => {
               stroke="#4CAF50"
               strokeWidth="8"
               fill="none"
-              className="text-green-500"
             />
             <circle
               cx="64"
@@ -136,7 +75,6 @@ const Result = () => {
                 2 * Math.PI * 56
               }`}
               transform="rotate(-90 64 64)"
-              className="text-green-700"
             />
           </svg>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold text-white">
@@ -159,7 +97,7 @@ const Result = () => {
         your responses below for more details.
       </motion.p>
 
-      {/* Go to Dashboard Button */}
+      {/* Retry Button */}
       <motion.div
         className="mb-6"
         initial={{ opacity: 0 }}
@@ -168,7 +106,7 @@ const Result = () => {
       >
         <Button
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full"
-            onClick={() => navigate("/")}
+          onClick={() => navigate("/")}
         >
           Start Quiz again
         </Button>
@@ -191,7 +129,8 @@ const Result = () => {
                 <span>Prompt</span>
                 <span>{response.score}/10</span>
               </div>
-              <p className="text-white">{response.prompt}</p>
+              <p className="text-white">{response.question}</p>
+              <p className="text-white">{response.userAnswer}</p>
               <div className="flex justify-between text-sm">
                 <span
                   className={
@@ -201,7 +140,7 @@ const Result = () => {
                   Your response {response.isCorrect ? "Correct" : "Incorrect"}
                 </span>
               </div>
-              <p className="text-gray-300">{response.userResponse}</p>
+              <p className="text-gray-300">{response.userAnswer}</p>
             </CardContent>
           </Card>
         ))}

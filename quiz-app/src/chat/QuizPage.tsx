@@ -5,18 +5,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import { useQuiz } from "../QuizContext";
 
 const QuizPage = () => {
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState<any[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [score, setScore] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const navigate = useNavigate();
+  const { addResponse } = useQuiz();
 
   useEffect(() => {
-    fetch("http://localhost:3001/data")
+    fetch("http://localhost:5000/data")
       .then((res) => res.json())
       .then((data) => {
         setQuestions(data.questions);
@@ -27,7 +29,7 @@ const QuizPage = () => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev === 1) {
-          handleNext(true); // auto-submit
+          handleNext(true);
           return 30;
         }
         return prev - 1;
@@ -36,15 +38,24 @@ const QuizPage = () => {
     return () => clearInterval(timer);
   }, [currentQuestionIndex]);
 
-  const handleOptionSelect = (option) => {
+  const handleOptionSelect = (option: string) => {
     if (selectedOptions.length < questions[currentQuestionIndex].correctAnswer.length) {
       setSelectedOptions([...selectedOptions, option]);
     }
   };
 
   const checkAnswer = () => {
-    const correct = questions[currentQuestionIndex].correctAnswer;
-    if (JSON.stringify(selectedOptions) === JSON.stringify(correct)) {
+    const currentQuestion = questions[currentQuestionIndex];
+    const isCorrect = JSON.stringify(selectedOptions) === JSON.stringify(currentQuestion.correctAnswer);
+
+    addResponse({
+      question: currentQuestion.question,
+      userAnswer: selectedOptions.join(", "),
+      isCorrect,
+      score: isCorrect ? 1 : 0,
+    });
+
+    if (isCorrect) {
       setScore((prev) => prev + 1);
       toast.success("Correct Answer!");
     } else {
@@ -53,23 +64,43 @@ const QuizPage = () => {
   };
 
   const handleNext = (isAutoSubmit = false) => {
-    if (!isAutoSubmit) checkAnswer();
+    const currentQuestion = questions[currentQuestionIndex];
+
+    if (!isAutoSubmit) {
+      checkAnswer();
+    } else {
+      addResponse({
+        question: currentQuestion.question,
+        userAnswer: selectedOptions.join(", ") || "No Answer",
+        isCorrect: false,
+        score: 0,
+      });
+    }
+
     setSelectedOptions([]);
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setTimeLeft(30);
     } else {
-      navigate("/result", { state: { score } });
+      navigate("/result");
     }
   };
 
   const handleSkip = () => {
+    const currentQuestion = questions[currentQuestionIndex];
+    addResponse({
+      question: currentQuestion.question,
+      userAnswer: "Skipped",
+      isCorrect: false,
+      score: 0,
+    });
+
     setSelectedOptions([]);
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setTimeLeft(30);
     } else {
-      navigate("/result", { state: { score } });
+      navigate("/result");
     }
   };
 
@@ -84,7 +115,6 @@ const QuizPage = () => {
 
   return (
     <motion.div className="relative min-h-screen flex flex-col items-center justify-center bg-black text-white px-4">
-      {/* Timer & Quit */}
       <div className="flex justify-between w-full max-w-2xl mb-4">
         <div className="text-gray-400 text-lg">
           ⏳ 0:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
@@ -94,7 +124,6 @@ const QuizPage = () => {
         </Button>
       </div>
 
-      {/* Progress bar */}
       <div className="w-full max-w-2xl h-2 bg-gray-700 rounded-full mb-4">
         <motion.div
           className="h-full bg-yellow-500 rounded-full"
@@ -103,7 +132,6 @@ const QuizPage = () => {
         />
       </div>
 
-      {/* Animated Score Display */}
       <motion.div
         className="absolute top-6 right-6 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold px-5 py-2 rounded-full shadow-lg text-lg"
         key={score}
@@ -114,7 +142,6 @@ const QuizPage = () => {
         Score: {score}
       </motion.div>
 
-      {/* Quiz card */}
       <Card className="w-full max-w-2xl bg-gray-800 border-none rounded-2xl p-8 shadow-xl">
         <CardContent className="space-y-6">
           <h2 className="text-yellow-400 text-xl text-center font-semibold">
@@ -122,7 +149,7 @@ const QuizPage = () => {
           </h2>
 
           <div className="text-white text-center text-lg flex flex-wrap justify-center leading-relaxed">
-            {parts.map((part, index) => (
+            {parts.map((part: string, index: number) => (
               <span key={index} className="flex items-center mx-1">
                 {part}
                 {index < q.correctAnswer.length && (
@@ -134,9 +161,8 @@ const QuizPage = () => {
             ))}
           </div>
 
-          {/* Option buttons */}
           <div className="flex flex-wrap justify-center gap-3 mt-4">
-            {q.options.map((opt, i) => (
+            {q.options.map((opt: string, i: number) => (
               <Button
                 key={i}
                 onClick={() => handleOptionSelect(opt)}
@@ -149,7 +175,6 @@ const QuizPage = () => {
             ))}
           </div>
 
-          {/* Submit & Skip */}
           <div className="flex justify-center gap-4 mt-4">
             <Button onClick={() => handleNext(false)} className="bg-green-600 hover:bg-green-700 px-6">
               Submit & Next
@@ -161,7 +186,6 @@ const QuizPage = () => {
         </CardContent>
       </Card>
 
-      {/* Toast Notification */}
       <ToastContainer position="top-center" autoClose={3000} />
     </motion.div>
   );
