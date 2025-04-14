@@ -5,11 +5,9 @@
   "type": "module",
   "scripts": {
   "dev": "vite",
-  "server": "json-server --watch db.json --port 5000",
   "build": "tsc -b && vite build",
   "lint": "eslint .",
-  "preview": "concurrently \"npm run server\" \"npm run preview\"",
-  "start": "npm run build && concurrently \"npm run server\" \"npm run preview\""
+  "preview": "concurrently \"npm run server\" \"npm run preview\""
 },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
