@@ -9,7 +9,7 @@
   "build": "tsc -b && vite build",
   "lint": "eslint .",
   "preview": "vite preview",
-  "start": "npm run build && concurrently \"npm run server\" \"npm run preview\""
+  "start": "concurrently \"npm run server\" \"npm run preview\""
 },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
