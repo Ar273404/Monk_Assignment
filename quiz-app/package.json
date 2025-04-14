@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",
+  "dev": "concurrently \"npm run server\" \"vite\"",
   "server": "json-server --watch db.json --port 5000",
   "build": "tsc -b && vite build",
   "lint": "eslint .",
-  "preview": "vite preview",
+  "preview": "concurrently \"npm run server\" \"npm run preview\"",
   "start": "npm run build && concurrently \"npm run server\" \"npm run preview\""
 },
   "dependencies": {
